@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>[hidden]{display:none!important}body{margin:0}img{max-width:100%}</style>
+<title>Gõ Phím Tí Hon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: one bright "playroom" world (deliberately single-theme). Home = lesson path + game cards; play screens = stage on top, shared keyboard + hands deck below. */
+:root{
+  color-scheme: light;
+  --bg:#E8F4F8; --paper:#FFFFFF; --ink:#1D2846; --muted:#5D6A86; --line:#CFE0EA;
+  --accent:#FF7A30; --accent-ink:#FFFFFF; --good:#2FA84F; --bad:#E5484D; --star:#FFC21A;
+  --f-L5:#EF5B5B; --f-L4:#F2A516; --f-L3:#3FAF4A; --f-L2:#3478F6;
+  --f-R2:#8A63E8; --f-R3:#13AFA2; --f-R4:#EC6BAA; --f-R5:#F07F2E; --f-T:#97A3BA;
+  --display:"Baloo 2", "Nunito", system-ui, sans-serif;
+  --body:"Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ks:clamp(26px, 6.4vw, 54px);
+  --r:18px;
+}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:20px 40px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0;text-wrap:balance}
+button{font:inherit;cursor:pointer;border:0;color:inherit;background:none}
+button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.btn{background:var(--accent);color:var(--accent-ink);font-weight:800;padding:10px 20px;border-radius:999px;box-shadow:0 4px 0 #C95A1C;transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #C95A1C}
+.btn.ghost{background:var(--paper);color:var(--ink);box-shadow:0 4px 0 var(--line);border:2px solid var(--line)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{display:grid;grid-template-columns:repeat(5,8px);gap:3px;align-items:end}
+.logo i{display:block;width:8px;border-radius:4px}
+.brand h1{font-size:clamp(28px,5vw,40px);font-weight:800}
+.brand small{display:block;color:var(--muted);font-weight:700;font-size:14px;margin-top:2px}
+.iconbtn{background:var(--paper);border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:800;font-size:14px}
+.notice{background:#FFF4D6;border:2px dashed var(--star);border-radius:var(--r);padding:12px 16px;font-weight:700;font-size:15px}
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.tip{background:var(--paper);border-radius:var(--r);padding:14px 16px;font-size:15px;color:var(--muted);border:2px solid var(--line)}
+.tip b{color:var(--ink);display:block;font-family:var(--display);font-size:18px}
+.section-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.section-h h2{font-size:26px}
+.section-h span{color:var(--muted);font-weight:700;font-size:14px}
+/* lesson path */
+.path{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:12px}
+.lesson{background:var(--paper);border-radius:var(--r);padding:12px;text-align:left;display:flex;flex-direction:column;gap:6px;border:2px solid var(--line);box-shadow:0 4px 0 var(--line);min-height:118px;transition:transform .1s}
+.lesson:hover:not(:disabled){transform:translateY(-2px)}
+.lesson:disabled{opacity:.45;cursor:not-allowed}
+.lesson .num{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.lesson .keys{display:flex;gap:4px;flex-wrap:wrap}
+.lesson .keys kbd{font-family:var(--display);font-size:18px;font-weight:800;min-width:30px;height:30px;display:grid;place-items:center;border-radius:8px;color:#fff;padding:0 4px}
+.lesson .name{font-weight:800;font-size:14px}
+.lesson.review{background:#F3EEFF}
+.stars{color:var(--line);font-size:16px;letter-spacing:2px;margin-top:auto}
+.stars .on{color:var(--star)}
+/* game cards */
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.game{border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:10px;color:#fff;position:relative;overflow:hidden;min-width:0}
+.game.balloon{background:linear-gradient(160deg,#3D8BFF,#7C5CF0)}
+.game.race{background:linear-gradient(160deg,#21B37E,#13AFA2)}
+.game h3{font-size:28px;font-weight:800}
+.game p{margin:0;font-weight:700;opacity:.92;font-size:15px}
+.game .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:auto}
+.game select{font:inherit;font-weight:700;border-radius:999px;padding:8px 12px;border:0;color:var(--ink);background:#fff;max-width:100%}
+.game .btn{background:#fff;color:var(--ink);box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.game .best{font-size:13px;font-weight:800;opacity:.9}
+/* play screens */
+.play-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.play-head h2{font-size:24px;flex:1;min-width:0}
+.stat{background:var(--paper);border-radius:999px;padding:6px 14px;font-weight:800;font-size:14px;border:2px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{height:12px;background:var(--paper);border-radius:999px;overflow:hidden;border:2px solid var(--line)}
+.bar i{display:block;height:100%;width:0;background:var(--good);border-radius:999px;transition:width .15s}
+.textbox{background:var(--paper);border-radius:22px;padding:22px;font-family:"Courier New",ui-monospace,monospace;font-weight:700;font-size:clamp(22px,4.4vw,34px);line-height:1.7;border:3px solid var(--line);min-height:150px}
+.textbox .w{white-space:nowrap;display:inline-block}
+.textbox .c{padding:0 2px;border-radius:6px;color:#9AA6BD}
+.textbox .c.ok{color:var(--good)}
+.textbox .c.cur{background:var(--ink);color:#fff}
+.textbox .c.err{background:var(--bad);color:#fff;animation:shake .25s}
+.textbox .sp{display:inline-block;width:.7em}
+.textbox .sp.cur{background:var(--ink);border-radius:6px}
+.hint{font-weight:800;font-size:18px;text-align:center;min-height:28px}
+.hint .chip{color:#fff;padding:2px 12px;border-radius:999px}
+/* deck: keyboard + hands */
+.deck{display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--paper);border-radius:24px;padding:18px 10px;border:2px solid var(--line)}
+.kb{display:flex;flex-direction:column;gap:5px;max-width:100%;overflow-x:auto}
+.kb .r{display:flex;gap:5px}
+.key{width:var(--ks);height:var(--ks);border-radius:10px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:calc(var(--ks)*.42);color:var(--ink);position:relative;border-bottom:4px solid rgba(0,0,0,.15);transition:transform .08s}
+.key.bump::after{content:"";position:absolute;bottom:18%;width:30%;height:3px;border-radius:2px;background:var(--ink);opacity:.6}
+.key.space{width:calc(var(--ks)*5.5)}
+.key.target{outline:4px solid var(--ink);outline-offset:2px;transform:translateY(-3px);animation:pulse 1s infinite}
+.key.pressed{transform:translateY(2px);border-bottom-width:1px}
+.key.wrong{background:var(--bad)!important;color:#fff}
+.hands{display:flex;gap:6%;justify-content:center;width:100%;max-width:520px}
+.hands svg{width:47%;height:auto}
+.hands .fg{opacity:.32;transition:opacity .15s}
+.hands .fg.on{opacity:1;stroke:var(--ink);stroke-width:3}
+.legend{font-size:13px;color:var(--muted);font-weight:700;text-align:center}
+/* balloon arena */
+.arena{position:relative;height:clamp(300px,48vh,420px);border-radius:24px;overflow:hidden;background:linear-gradient(#BFE6FF,#F0FAFF 70%,#DFF5E3);border:3px solid var(--line)}
+.arena .ground{position:absolute;left:0;right:0;bottom:0;height:22px;background:#9ED99F}
+.balloon{position:absolute;left:0;top:0;width:58px;height:70px;border-radius:50% 50% 48% 48%;display:grid;place-items:center;color:#fff;font-family:var(--display);font-weight:800;font-size:30px;box-shadow:inset -8px -10px 0 rgba(0,0,0,.12);will-change:transform}
+.balloon::after{content:"";position:absolute;top:100%;left:50%;width:2px;height:34px;background:rgba(29,40,70,.35)}
+.balloon.urgent{outline:3px solid var(--ink);outline-offset:3px}
+.pop{position:absolute;font-family:var(--display);font-weight:800;color:var(--accent);font-size:22px;pointer-events:none;animation:rise .6s forwards}
+.lives{color:var(--bad);letter-spacing:3px}
+/* race */
+.track{background:var(--paper);border-radius:24px;padding:16px;border:3px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.lane{position:relative;height:64px;background:repeating-linear-gradient(90deg,#EAF3E5 0 40px,#E1EDDB 40px 80px);border-radius:14px}
+.lane .runner{position:absolute;top:50%;left:0;font-size:42px;line-height:1;transform:translate(0,-50%);transition:left .25s}
+.lane .finish{position:absolute;right:8px;top:0;bottom:0;width:14px;background:repeating-linear-gradient(0deg,var(--ink) 0 8px,#fff 8px 16px);border-radius:3px}
+.lane .tag{position:absolute;left:8px;bottom:2px;font-size:12px;font-weight:800;color:var(--muted)}
+.word{text-align:center;font-family:"Courier New",ui-monospace,monospace;font-weight:700;font-size:clamp(34px,8vw,56px);letter-spacing:.06em}
+.word .ok{color:var(--good)}
+.word .cur{text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:8px}
+.word .err{color:var(--bad)}
+.count{font-family:var(--display);font-size:64px;text-align:center;color:var(--accent);font-weight:800;min-height:80px}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(29,40,70,.45);display:grid;place-items:center;padding:20px;z-index:20}
+.card{background:var(--paper);border-radius:28px;padding:28px;max-width:420px;width:100%;text-align:center;display:flex;flex-direction:column;gap:12px;animation:popin .3s}
+.card h2{font-size:34px}
+.card .big{font-size:48px;letter-spacing:6px;color:var(--line)}
+.card .big .on{color:var(--star)}
+.card p{margin:0;color:var(--muted);font-weight:700}
+.card .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-weight:800;z-index:30;max-width:calc(100% - 32px);text-align:center}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes pulse{50%{outline-color:var(--accent)}}
+@keyframes rise{to{transform:translateY(-40px);opacity:0}}
+@keyframes popin{from{transform:scale(.85);opacity:0}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:560px){.textbox{padding:14px}.deck{padding:12px 6px}.kb .r,.kb{gap:3px}}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app">
+  <!-- HOME -->
+  <section id="home" class="wrap" style="max-width:none">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <i style="height:18px;background:var(--f-L5)"></i><i style="height:26px;background:var(--f-L4)"></i><i style="height:30px;background:var(--f-L3)"></i><i style="height:26px;background:var(--f-L2)"></i><i style="height:14px;background:var(--f-T)"></i>
+        </div>
+        <div><h1>Gõ Phím Tí Hon</h1><small>Học gõ 10 ngón qua trò chơi</small></div>
+      </div>
+      <button class="iconbtn" id="soundBtn" type="button">Âm thanh: Bật</button>
+    </div>
+    <div class="notice" id="touchNotice" hidden>Trò chơi cần bàn phím thật. Hãy mở trên máy tính hoặc cắm bàn phím vào máy tính bảng nhé.</div>
+    <div class="tips">
+      <div class="tip"><b>Đặt tay đúng chỗ</b>Hai ngón trỏ đặt lên phím F và J, chỗ có gờ nổi nhỏ. Các ngón còn lại nằm cạnh nhau trên hàng giữa.</div>
+      <div class="tip"><b>Mỗi ngón một màu</b>Phím cùng màu với ngón tay nào thì dùng ngón đó để gõ. Gõ xong, ngón tay quay về hàng giữa.</div>
+      <div class="tip"><b>Nhìn màn hình</b>Cố gắng không nhìn xuống bàn phím. Hãy tắt Unikey hoặc bộ gõ tiếng Việt trước khi chơi.</div>
+    </div>
+    <div class="section-h"><h2>Trò chơi</h2><span>Chọn bài để lấy các phím đã học</span></div>
+    <div class="games">
+      <div class="game balloon">
+        <h3>Bắn bóng bay</h3>
+        <p>Bóng bay lên trời. Gõ đúng chữ trên bóng để bắn vỡ trước khi bóng bay mất. Màu bóng chính là màu ngón tay cần dùng.</p>
+        <div class="best" id="bestBalloon"></div>
+        <div class="row"><select id="balloonLevel" aria-label="Phím dùng trong trò Bắn bóng bay"></select><button class="btn" type="button" id="startBalloon">Chơi</button></div>
+      </div>
+      <div class="game race">
+        <h3>Đua với bạn</h3>
+        <p>Gõ đúng từng từ để chú thỏ chạy nhanh hơn bạn đua. Gõ đủ 10 từ là về đích.</p>
+        <div class="best" id="bestRace"></div>
+        <div class="row">
+          <select id="raceLevel" aria-label="Phím dùng trong trò Đua"></select>
+          <select id="raceRival" aria-label="Chọn bạn đua">
+            <option value="100">Ốc sên (dễ)</option>
+            <option value="60" selected>Rùa (vừa)</option>
+            <option value="35">Cáo (khó)</option>
+          </select>
+          <button class="btn" type="button" id="startRace">Chơi</button>
+        </div>
+      </div>
+    </div>
+    <div class="section-h"><h2>Bài học</h2><span id="progressText"></span></div>
+    <div class="path" id="path"></div>
+  </section>
+
+  <!-- PLAY -->
+  <section id="play" class="wrap" style="max-width:none" hidden>
+    <div class="play-head">
+      <button class="btn ghost" type="button" id="backBtn">← Về nhà</button>
+      <h2 id="playTitle"></h2>
+      <span class="stat" id="stat1"></span><span class="stat" id="stat2"></span>
+    </div>
+    <div id="stage"></div>
+    <div class="hint" id="hint"></div>
+    <div class="deck">
+      <div class="kb" id="kb"></div>
+      <div class="hands" id="hands"></div>
+      <div class="legend">Phím có viền đậm là phím cần gõ. Ngón tay sáng lên là ngón cần dùng.</div>
+    </div>
+  </section>
+</div>
+<div class="modal" id="modal" hidden><div class="card" id="modalCard"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const store = {
+  get(k,d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+
+/* ---------- data ---------- */
+const FINGER = {q:'L5',a:'L5',z:'L5',w:'L4',s:'L4',x:'L4',e:'L3',d:'L3',c:'L3',r:'L2',f:'L2',v:'L2',t:'L2',g:'L2',b:'L2',
+  y:'R2',h:'R2',n:'R2',u:'R2',j:'R2',m:'R2',i:'R3',k:'R3',',':'R3',o:'R4',l:'R4','.':'R4',p:'R5',';':'R5','/':'R5',' ':'T'};
+const FNAME = {L5:'ngón út trái',L4:'ngón áp út trái',L3:'ngón giữa trái',L2:'ngón trỏ trái',R2:'ngón trỏ phải',R3:'ngón giữa phải',R4:'ngón áp út phải',R5:'ngón út phải',T:'ngón cái'};
+const ROWS = ['qwertyuiop','asdfghjkl;','zxcvbnm,./'];
+const LESSONS = [
+  {k:'fj', n:'Hai ngón trỏ'}, {k:'dk', n:'Hai ngón giữa'}, {k:'sl', n:'Ngón áp út'}, {k:'a;', n:'Ngón út'},
+  {k:'', n:'Ôn hàng giữa', review:true},
+  {k:'gh', n:'Trỏ vào giữa'}, {k:'ei', n:'Lên hàng trên'}, {k:'ru', n:'Trỏ lên trên'}, {k:'ty', n:'Trỏ chéo lên'},
+  {k:'wo', n:'Áp út lên trên'}, {k:'qp', n:'Út lên trên'},
+  {k:'', n:'Ôn hàng trên', review:true},
+  {k:'vm', n:'Trỏ xuống dưới'}, {k:'c,', n:'Giữa xuống dưới'}, {k:'x.', n:'Áp út xuống'}, {k:'z/', n:'Út xuống dưới'}, {k:'bn', n:'Trỏ chéo xuống'},
+  {k:'', n:'Ôn cả bàn phím', review:true}
+];
+const BANK = ('ba me bo ca ga ha la ma na sa ta va da xa xe ke lo mo mu nu ru su to tu de be ve he se le ' +
+ 'an em anh cam com bon nam sau bay hai mot tim cau kia day dep vui cho meo chim rua tho voi gau khi ngua heo cua oc ech ' +
+ 'sao trang mat troi mua gio may cay qua xoai dua tao nha hoc ban sach vo but thuoc lop co thay bao ngoan yeu chao ' +
+ 'sad dad add ask all fall flask lass salad glad hall half jade fake lake desk kids ' +
+ 'fish dog cat sun red blue green tree home milk book jump play run star moon').split(' ');
+const keysUpTo = i => { let s=''; for(let j=0;j<=i;j++) s+=LESSONS[j].k; return s; };
+const lettersOf = s => [...s].filter(c=>/[a-z]/.test(c));
+const rnd = n => Math.floor(Math.random()*n);
+const pick = a => a[rnd(a.length)];
+const wordsFor = i => { const al = keysUpTo(i); return BANK.filter(w => [...w].every(c => al.includes(c))); };
+function group(focus, allowed){
+  const len = 2 + rnd(3); let g='';
+  for(let i=0;i<len;i++) g += Math.random()<0.6 ? pick(focus) : pick(allowed);
+  return g;
+}
+function genDrill(i){
+  const allowed = [...keysUpTo(i)];
+  const focus = LESSONS[i].k ? [...LESSONS[i].k] : allowed;
+  const words = wordsFor(i);
+  const out = [];
+  for(let n=0;n<11;n++) out.push(words.length>=6 && Math.random()<0.55 ? pick(words) : group(focus, allowed));
+  return out.join(' ');
+}
+
+let progress = store.get('gpth-progress', {});
+let best = store.get('gpth-best', {balloon:0, race:null});
+let soundOn = store.get('gpth-sound', true);
+const unlocked = i => i===0 || (progress[i-1]||0) >= 1;
+
+/* ---------- sound ---------- */
+let ac = null;
+function beep(freq, dur, type, vol){
+  if(!soundOn) return;
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type||'sine'; o.frequency.value = freq; g.gain.value = vol||0.06;
+    g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + dur);
+    o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + dur);
+  }catch(e){}
+}
+const sGood = () => beep(660, .08, 'triangle', .05);
+const sBad = () => beep(150, .18, 'square', .04);
+const sPop = () => { beep(880,.07,'triangle',.07); setTimeout(()=>beep(1320,.09,'triangle',.05),50); };
+const sWin = () => [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.18,'triangle',.07), i*120));
+
+/* ---------- keyboard + hands ---------- */
+function buildDeck(){
+  const kb = $('#kb'); kb.innerHTML='';
+  ROWS.forEach((row, ri) => {
+    const r = document.createElement('div'); r.className='r';
+    r.style.marginLeft = `calc(var(--ks) * ${[0,.3,.8][ri]})`;
+    [...row].forEach(c => {
+      const k = document.createElement('div'); k.className='key' + ((c==='f'||c==='j')?' bump':'');
+      k.dataset.k = c; k.textContent = c.toUpperCase();
+      k.style.background = `var(--f-${FINGER[c]})`; k.style.color = '#fff';
+      r.appendChild(k);
+    });
+    kb.appendChild(r);
+  });
+  const r = document.createElement('div'); r.className='r'; r.style.justifyContent='center';
+  const sp = document.createElement('div'); sp.className='key space'; sp.dataset.k=' '; sp.textContent='cách';
+  sp.style.background='var(--f-T)'; sp.style.color='#fff'; sp.style.fontSize='calc(var(--ks)*.3)';
+  r.appendChild(sp); kb.appendChild(r);
+
+  const hand = (side) => {
+    const ids = side==='L' ? ['L5','L4','L3','L2'] : ['R5','R4','R3','R2'];
+    const xs=[18,48,78,108], hs=[52,70,80,70];
+    let f = ids.map((id,i)=>`<rect class="fg" data-f="${id}" x="${xs[i]}" y="${82-hs[i]}" width="26" height="${hs[i]+14}" rx="13" fill="var(--f-${id})"/>`).join('');
+    f += `<rect class="fg" data-f="T" x="140" y="70" width="26" height="54" rx="13" fill="var(--f-T)" transform="rotate(-38 153 97)"/>`;
+    const flip = side==='R' ? 'transform="translate(200 0) scale(-1 1)"' : '';
+    return `<svg viewBox="0 0 200 150" role="img" aria-label="Bàn tay ${side==='L'?'trái':'phải'}"><g ${flip}><rect x="14" y="80" width="126" height="62" rx="28" fill="#F6D8C2"/>${f}</g></svg>`;
+  };
+  $('#hands').innerHTML = hand('L') + hand('R');
+}
+function setTarget(c){
+  document.querySelectorAll('.key.target').forEach(e=>e.classList.remove('target'));
+  document.querySelectorAll('.fg.on').forEach(e=>e.classList.remove('on'));
+  const hint = $('#hint');
+  if(c==null){ hint.textContent=''; return; }
+  const k = document.querySelector(`.key[data-k="${CSS.escape(c)}"]`); if(k) k.classList.add('target');
+  const f = FINGER[c];
+  document.querySelectorAll(`.fg[data-f="${f}"]`).forEach(e=>e.classList.add('on'));
+  const label = c===' ' ? 'phím cách' : `chữ <b>${c.toUpperCase()}</b>`;
+  hint.innerHTML = `Gõ ${label} bằng <span class="chip" style="background:var(--f-${f})">${FNAME[f]}</span>`;
+}
+function flashKey(c, ok){
+  const k = document.querySelector(`.key[data-k="${CSS.escape(c)}"]`); if(!k) return;
+  const cls = ok ? 'pressed' : 'wrong';
+  k.classList.add(cls); setTimeout(()=>k.classList.remove(cls), ok?110:260);
+}
+
+/* ---------- screens ---------- */
+let mode = null, loopId = 0;
+function stopLoop(){ cancelAnimationFrame(loopId); loopId = 0; }
+function goHome(){
+  stopLoop(); mode = null; closeModal();
+  $('#play').hidden = true; $('#home').hidden = false; renderHome(); window.scrollTo(0,0);
+}
+function openPlay(title){
+  $('#home').hidden = true; $('#play').hidden = false; $('#playTitle').textContent = title;
+  $('#stage').innerHTML=''; window.scrollTo(0,0);
+}
+function renderHome(){
+  const path = $('#path'); path.innerHTML='';
+  let done = 0;
+  LESSONS.forEach((L,i) => {
+    const st = progress[i]||0; if(st) done++;
+    const b = document.createElement('button'); b.type='button';
+    b.className = 'lesson' + (L.review?' review':''); b.disabled = !unlocked(i);
+    const keys = L.k ? [...L.k].map(c=>`<kbd style="background:var(--f-${FINGER[c]})">${c.toUpperCase()}</kbd>`).join('') : `<kbd style="background:var(--ink)">ÔN</kbd>`;
+    b.innerHTML = `<span class="num">Bài ${i+1}</span><span class="keys">${keys}</span><span class="name">${L.n}</span>
+      <span class="stars">${[1,2,3].map(n=>`<span class="${n<=st?'on':''}">★</span>`).join('')}</span>`;
+    b.addEventListener('click', ()=>startLesson(i));
+    path.appendChild(b);
+  });
+  $('#progressText').textContent = `Đã xong ${done}/${LESSONS.length} bài`;
+  // level selects: only unlocked lessons
+  ['#balloonLevel','#raceLevel'].forEach(sel => {
+    const s = $(sel), prev = s.value; s.innerHTML='';
+    LESSONS.forEach((L,i)=>{ if(unlocked(i)){ const o=document.createElement('option'); o.value=i; o.textContent=`Phím đến bài ${i+1}`; s.appendChild(o);} });
+    s.value = prev && s.querySelector(`option[value="${prev}"]`) ? prev : s.lastElementChild.value;
+  });
+  $('#bestBalloon').textContent = best.balloon ? `Kỷ lục: ${best.balloon} bóng` : 'Chưa có kỷ lục';
+  $('#bestRace').textContent = best.race ? `Nhanh nhất: ${best.race} giây` : 'Chưa có kỷ lục';
+  $('#soundBtn').textContent = 'Âm thanh: ' + (soundOn?'Bật':'Tắt');
+}
+
+/* ---------- lesson ---------- */
+let P = null;
+function startLesson(i){
+  const text = genDrill(i);
+  P = {i, text, pos:0, ok:0, bad:0, t0:0};
+  mode = 'lesson'; openPlay(`Bài ${i+1}: ${LESSONS[i].n}`);
+  const box = document.createElement('div'); box.className='textbox';
+  box.innerHTML = text.split(' ').map((w,wi,arr)=>
+    `<span class="w">${[...w].map(c=>`<span class="c">${c}</span>`).join('')}</span>` + (wi<arr.length-1?'<span class="sp c"> </span>':'')
+  ).join('');
+  const bar = document.createElement('div'); bar.className='bar'; bar.innerHTML='<i id="pbar"></i>';
+  $('#stage').append(bar, box);
+  $('#stage').style.cssText='display:flex;flex-direction:column;gap:12px';
+  P.spans = [...box.querySelectorAll('.c')];
+  updateLesson();
+}
+function updateLesson(){
+  P.spans.forEach((s,i)=>{ s.classList.toggle('cur', i===P.pos); });
+  setTarget(P.text[P.pos] ?? null);
+  const acc = P.ok+P.bad ? Math.round(P.ok/(P.ok+P.bad)*100) : 100;
+  $('#stat1').textContent = `Chính xác ${acc}%`;
+  const min = P.t0 ? (performance.now()-P.t0)/60000 : 0;
+  $('#stat2').textContent = `${min>0.05?Math.round(P.ok/min):0} phím/phút`;
+  $('#pbar').style.width = (P.pos/P.text.length*100)+'%';
+}
+function lessonKey(c){
+  if(!P.t0) P.t0 = performance.now();
+  const want = P.text[P.pos], span = P.spans[P.pos];
+  if(c===want){
+    P.ok++; span.classList.remove('err'); span.classList.add('ok'); P.pos++; flashKey(c,true); sGood();
+    if(P.pos>=P.text.length) return finishLesson();
+  } else {
+    P.bad++; flashKey(c,false); sBad();
+    span.classList.remove('err'); void span.offsetWidth; span.classList.add('err');
+  }
+  updateLesson();
+}
+function finishLesson(){
+  const acc = Math.round(P.ok/(P.ok+P.bad)*100);
+  const min = (performance.now()-P.t0)/60000;
+  const speed = Math.round(P.ok/min);
+  const stars = acc>=95?3:acc>=85?2:1;
+  if(stars > (progress[P.i]||0)){ progress[P.i]=stars; store.set('gpth-progress', progress); }
+  setTarget(null); sWin(); mode='result';
+  const hasNext = P.i < LESSONS.length-1;
+  showResult({
+    title: stars===3?'Tuyệt vời!':stars===2?'Giỏi lắm!':'Hoàn thành!', stars,
+    lines:[`Chính xác ${acc}% · ${speed} phím/phút`, stars<3?'Gõ đúng từ 95% trở lên để được 3 sao.':'Bạn đã sẵn sàng cho bài tiếp theo.'],
+    primary: hasNext ? {label:'Bài tiếp theo', fn:()=>startLesson(P.i+1)} : {label:'Về nhà', fn:goHome},
+    secondary: {label:'Chơi lại', fn:()=>startLesson(P.i)}
+  });
+}
+
+/* ---------- balloon game ---------- */
+let B = null;
+function startBalloon(){
+  const lv = +$('#balloonLevel').value;
+  const letters = lettersOf(keysUpTo(lv));
+  mode='balloon'; openPlay('Bắn bóng bay');
+  $('#stage').style.cssText='';
+  const arena = document.createElement('div'); arena.className='arena'; arena.innerHTML='<div class="ground"></div>';
+  $('#stage').appendChild(arena);
+  B = {arena, letters, items:[], lives:5, score:0, spawn:0, last:0};
+  updBalloonStats();
+  loopId = requestAnimationFrame(balloonLoop);
+}
+function updBalloonStats(){
+  $('#stat1').innerHTML = `Bóng vỡ: ${B.score}`;
+  $('#stat2').innerHTML = `<span class="lives">${'♥'.repeat(B.lives)}</span>${'♡'.repeat(5-B.lives)}`;
+}
+function balloonLoop(ts){
+  if(mode!=='balloon') return;
+  const dt = B.last ? Math.min((ts-B.last)/1000, .05) : 0; B.last = ts;
+  const H = B.arena.clientHeight, W = B.arena.clientWidth;
+  const speed = 34 + B.score*1.4, gap = Math.max(.75, 2.1 - B.score*.035);
+  B.spawn -= dt;
+  if(B.spawn<=0 && B.items.length < 7){
+    B.spawn = gap;
+    const c = pick(B.letters), el = document.createElement('div');
+    el.className='balloon'; el.textContent=c.toUpperCase(); el.style.background=`var(--f-${FINGER[c]})`;
+    B.arena.appendChild(el);
+    B.items.push({c, el, x: 10 + Math.random()*Math.max(10, W-80), y: H});
+  }
+  for(const b of [...B.items]){
+    b.y -= speed*dt;
+    b.el.style.transform = `translate(${b.x}px, ${b.y}px)`;
+    if(b.y < -110){ b.el.remove(); B.items.splice(B.items.indexOf(b),1); B.lives--; sBad(); updBalloonStats();
+      if(B.lives<=0) return endBalloon(); }
+  }
+  const urgent = B.items.reduce((m,b)=>!m||b.y<m.y?b:m, null);
+  B.items.forEach(b=>b.el.classList.toggle('urgent', b===urgent));
+  setTarget(urgent ? urgent.c : null);
+  loopId = requestAnimationFrame(balloonLoop);
+}
+function balloonKey(c){
+  const hits = B.items.filter(b=>b.c===c);
+  if(!hits.length){ flashKey(c,false); sBad(); return; }
+  const b = hits.reduce((m,x)=>x.y<m.y?x:m);
+  flashKey(c,true); sPop();
+  const p = document.createElement('div'); p.className='pop'; p.textContent='+1';
+  p.style.left = (b.x+18)+'px'; p.style.top = (b.y+20)+'px'; B.arena.appendChild(p); setTimeout(()=>p.remove(),600);
+  b.el.remove(); B.items.splice(B.items.indexOf(b),1); B.score++; updBalloonStats();
+}
+function endBalloon(){
+  stopLoop(); setTarget(null); mode='result';
+  const rec = B.score > best.balloon; if(rec){ best.balloon = B.score; store.set('gpth-best', best); }
+  const stars = B.score>=40?3:B.score>=20?2:B.score>=8?1:0;
+  stars ? sWin() : sBad();
+  showResult({title: rec?'Kỷ lục mới!':'Hết lượt rồi!', stars,
+    lines:[`Bạn đã bắn vỡ ${B.score} quả bóng.`, 'Nhớ nhìn màu bóng để chọn đúng ngón tay.'],
+    primary:{label:'Chơi lại', fn:startBalloon}, secondary:{label:'Về nhà', fn:goHome}});
+}
+
+/* ---------- race game ---------- */
+let R = null;
+function startRace(){
+  const lv = +$('#raceLevel').value, rivalT = +$('#raceRival').value;
+  const rivalName = $('#raceRival').selectedOptions[0].textContent.split(' (')[0];
+  const rivalIcon = {100:'🐌',60:'🐢',35:'🦊'}[rivalT];
+  const words = wordsFor(lv), allowed = lettersOf(keysUpTo(lv)), focus = LESSONS[lv].k ? lettersOf(LESSONS[lv].k) : allowed;
+  const list = []; for(let n=0;n<10;n++) list.push(words.length>=6 ? pick(words) : group(focus.length?focus:allowed, allowed));
+  mode='race-wait'; openPlay('Đua với ' + rivalName.toLowerCase());
+  $('#stage').style.cssText='display:flex;flex-direction:column;gap:14px';
+  $('#stage').innerHTML = `<div class="track">
+      <div class="lane"><span class="runner" id="me">🐰</span><span class="finish"></span><span class="tag">Bạn</span></div>
+      <div class="lane"><span class="runner" id="rival">${rivalIcon}</span><span class="finish"></span><span class="tag">${rivalName}</span></div>
+    </div><div class="count" id="count">3</div><div class="word" id="word"></div>`;
+  R = {list, idx:0, pos:0, ok:0, bad:0, rivalT, t0:0};
+  $('#stat1').textContent = 'Từ: 0/10'; $('#stat2').textContent = '0.0 giây';
+  drawWord(); setTarget(R.list[0][0]);
+  let n = 3; beep(440,.12,'triangle',.06);
+  const tick = setInterval(()=>{
+    if(mode!=='race-wait'){ clearInterval(tick); return; }
+    n--; if(n>0){ $('#count').textContent=n; beep(440,.12,'triangle',.06); }
+    else { clearInterval(tick); $('#count').textContent='Chạy!'; beep(880,.2,'triangle',.07);
+      mode='race'; R.t0=performance.now(); loopId=requestAnimationFrame(raceLoop);
+      setTimeout(()=>{ const c=$('#count'); if(c && mode==='race') c.textContent=''; }, 700); }
+  }, 800);
+}
+function laneX(el, frac){ const lane = el.parentElement; el.style.left = `calc(${Math.min(frac,1)} * (100% - 64px))`; }
+function drawWord(){
+  const w = R.list[R.idx]||'';
+  $('#word').innerHTML = [...w].map((c,i)=>`<span class="${i<R.pos?'ok':i===R.pos?'cur':''}">${c}</span>`).join('');
+}
+function raceLoop(ts){
+  if(mode!=='race') return;
+  const t = (performance.now()-R.t0)/1000;
+  $('#stat2').textContent = t.toFixed(1)+' giây';
+  laneX($('#rival'), t/R.rivalT);
+  if(t >= R.rivalT) return endRace(false);
+  loopId = requestAnimationFrame(raceLoop);
+}
+function raceKey(c){
+  const w = R.list[R.idx];
+  if(c===w[R.pos]){
+    R.ok++; R.pos++; flashKey(c,true); sGood();
+    if(R.pos>=w.length){ R.idx++; R.pos=0; sPop(); laneX($('#me'), R.idx/10); $('#stat1').textContent=`Từ: ${R.idx}/10`;
+      if(R.idx>=10) return endRace(true); }
+  } else { R.bad++; flashKey(c,false); sBad();
+    const s = $('#word .cur'); if(s){ s.classList.add('err'); setTimeout(()=>s.classList.remove('err'),250); } }
+  drawWord(); setTarget(R.list[R.idx][R.pos]);
+}
+function endRace(win){
+  stopLoop(); setTarget(null); mode='result';
+  const t = +((performance.now()-R.t0)/1000).toFixed(1);
+  const acc = Math.round(R.ok/Math.max(1,R.ok+R.bad)*100);
+  let rec = false;
+  if(win && (!best.race || t<best.race)){ best.race=t; store.set('gpth-best',best); rec=true; }
+  win ? sWin() : sBad();
+  showResult({title: win ? (rec?'Về nhất, kỷ lục mới!':'Về nhất!') : 'Suýt nữa thôi!', stars: win ? (acc>=95?3:acc>=85?2:1) : 0,
+    lines:[win?`Bạn về đích sau ${t} giây.`:`Bạn đã gõ được ${R.idx}/10 từ.`, `Chính xác ${acc}%`],
+    primary:{label:'Đua lại', fn:startRace}, secondary:{label:'Về nhà', fn:goHome}});
+}
+
+/* ---------- modal / toast ---------- */
+let modalPrimary = null;
+function showResult({title, stars, lines, primary, secondary}){
+  modalPrimary = primary.fn;
+  $('#modalCard').innerHTML = `<h2>${title}</h2>
+    <div class="big">${[1,2,3].map(n=>`<span class="${n<=stars?'on':''}">★</span>`).join('')}</div>
+    ${lines.map(l=>`<p>${l}</p>`).join('')}
+    <div class="acts"><button class="btn ghost" type="button" id="m2">${secondary.label}</button><button class="btn" type="button" id="m1">${primary.label} ↵</button></div>`;
+  $('#modal').hidden = false;
+  $('#m1').onclick = ()=>{ closeModal(); primary.fn(); };
+  $('#m2').onclick = ()=>{ closeModal(); secondary.fn(); };
+}
+function closeModal(){ $('#modal').hidden = true; modalPrimary = null; }
+let toastT;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true, 3200); }
+
+/* ---------- input ---------- */
+document.addEventListener('keydown', e => {
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+  if(!$('#modal').hidden){
+    if(e.key==='Enter' && modalPrimary){ e.preventDefault(); const f=modalPrimary; closeModal(); f(); }
+    else if(e.key==='Escape'){ goHome(); }
+    return;
+  }
+  if(e.key==='Escape' && mode){ goHome(); return; }
+  if(!mode || mode==='result' || mode==='race-wait') { if(e.key===' ' && mode) e.preventDefault(); return; }
+  if(e.key.length!==1) return;
+  if(e.target && e.target.tagName==='SELECT') return;
+  const c = e.key.toLowerCase();
+  if(c===' ') e.preventDefault();
+  if(!(c in FINGER)){
+    if(/[^\x00-\x7f]/.test(c)) toast('Hình như bộ gõ tiếng Việt đang bật. Hãy tắt Unikey rồi chơi tiếp nhé.');
+    else if(e.key !== c && e.key===e.key.toUpperCase()) toast('Phím Caps Lock đang bật.');
+    return;
+  }
+  if(mode==='lesson') lessonKey(c);
+  else if(mode==='balloon') balloonKey(c);
+  else if(mode==='race') raceKey(c);
+});
+
+$('#backBtn').addEventListener('click', goHome);
+$('#startBalloon').addEventListener('click', startBalloon);
+$('#startRace').addEventListener('click', startRace);
+$('#soundBtn').addEventListener('click', ()=>{ soundOn=!soundOn; store.set('gpth-sound',soundOn); renderHome(); if(soundOn) sGood(); });
+if(window.matchMedia && matchMedia('(pointer:coarse)').matches && !matchMedia('(pointer:fine)').matches) $('#touchNotice').hidden=false;
+
+buildDeck();
+renderHome();
+})();
+</script>
+</body>
+</html>
