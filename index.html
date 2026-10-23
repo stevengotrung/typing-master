@@ -78,7 +78,7 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outlin
 .textbox .c{padding:0 2px;border-radius:6px;color:#9AA6BD}
 .textbox .c.ok{color:var(--good)}
 .textbox .c.cur{background:var(--ink);color:#fff}
-.textbox .c.err{background:var(--bad);color:#fff;animation:shake .25s}
+.textbox .c.err{background:var(--bad);color:#fff;text-decoration:underline wavy #fff;text-underline-offset:6px}
 .textbox .sp{display:inline-block;width:.7em}
 .textbox .sp.cur{background:var(--ink);border-radius:6px}
 .hint{font-weight:800;font-size:18px;text-align:center;min-height:28px}
@@ -87,12 +87,18 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outlin
 .deck{display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--paper);border-radius:24px;padding:18px 10px;border:2px solid var(--line)}
 .kb{display:flex;flex-direction:column;gap:5px;max-width:100%;overflow-x:auto}
 .kb .r{display:flex;gap:5px}
-.key{width:var(--ks);height:var(--ks);border-radius:10px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:calc(var(--ks)*.42);color:var(--ink);position:relative;border-bottom:4px solid rgba(0,0,0,.15);transition:transform .08s}
+.key{box-sizing:border-box;flex:none;width:var(--ks);height:var(--ks);border-radius:10px;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:calc(var(--ks)*.42);color:var(--ink);position:relative;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
 .key.bump::after{content:"";position:absolute;bottom:18%;width:30%;height:3px;border-radius:2px;background:var(--ink);opacity:.6}
 .key.space{width:calc(var(--ks)*5.5)}
-.key.target{outline:4px solid var(--ink);outline-offset:2px;transform:translateY(-3px);animation:pulse 1s infinite}
-.key.pressed{transform:translateY(2px);border-bottom-width:1px}
-.key.wrong{background:var(--bad)!important;color:#fff}
+.key.target{outline:4px solid var(--ink);outline-offset:2px;animation:pulse 1s infinite}
+.key.pressed{box-shadow:inset 0 -1px 0 rgba(0,0,0,.18),inset 0 0 0 40px rgba(255,255,255,.25)}
+.key.wrong{background:var(--bad)!important;color:#fff;outline:4px solid var(--bad);outline-offset:3px;animation:none}
+.key.wrong::before{content:"✕";position:absolute;top:-12px;right:-12px;width:24px;height:24px;border-radius:50%;background:#fff;color:var(--bad);border:2px solid var(--bad);display:grid;place-items:center;font-size:14px;line-height:1;z-index:2}
+.kb{padding:14px 14px 6px}
+.hint.bad{color:var(--bad);background:#FFE7E7;border:3px solid var(--bad);border-radius:999px;padding:6px 18px;width:fit-content;max-width:100%;margin-inline:auto}
+.hint .wrongk{display:inline-block;background:var(--bad);color:#fff;border-radius:8px;padding:0 10px;font-family:var(--display)}
+.textbox.oops,.arena.oops,.track.oops{border-color:var(--bad);box-shadow:0 0 0 4px #FFD0D0}
+.stat.bad{color:var(--bad);border-color:var(--bad)}
 .hands{display:flex;gap:6%;justify-content:center;width:100%;max-width:520px}
 .hands svg{width:47%;height:auto}
 .hands .fg{opacity:.32;transition:opacity .15s}
@@ -115,7 +121,7 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outlin
 .word{text-align:center;font-family:"Courier New",ui-monospace,monospace;font-weight:700;font-size:clamp(34px,8vw,56px);letter-spacing:.06em}
 .word .ok{color:var(--good)}
 .word .cur{text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:8px}
-.word .err{color:var(--bad)}
+.word .err{color:#fff;background:var(--bad);border-radius:8px;text-decoration:none}
 .count{font-family:var(--display);font-size:64px;text-align:center;color:var(--accent);font-weight:800;min-height:80px}
 /* modal */
 .modal{position:fixed;inset:0;background:rgba(29,40,70,.45);display:grid;place-items:center;padding:20px;z-index:20}
@@ -297,21 +303,31 @@ function buildDeck(){
   };
   $('#hands').innerHTML = hand('L') + hand('R');
 }
-function setTarget(c){
+function setTarget(c, wrong){
   document.querySelectorAll('.key.target').forEach(e=>e.classList.remove('target'));
   document.querySelectorAll('.fg.on').forEach(e=>e.classList.remove('on'));
   const hint = $('#hint');
-  if(c==null){ hint.textContent=''; return; }
+  if(c==null){ hint.textContent=''; hint.classList.remove('bad'); return; }
   const k = document.querySelector(`.key[data-k="${CSS.escape(c)}"]`); if(k) k.classList.add('target');
   const f = FINGER[c];
   document.querySelectorAll(`.fg[data-f="${f}"]`).forEach(e=>e.classList.add('on'));
   const label = c===' ' ? 'phím cách' : `chữ <b>${c.toUpperCase()}</b>`;
-  hint.innerHTML = `Gõ ${label} bằng <span class="chip" style="background:var(--f-${f})">${FNAME[f]}</span>`;
+  const chip = `<span class="chip" style="background:var(--f-${f})">${FNAME[f]}</span>`;
+  hint.classList.toggle('bad', !!wrong);
+  if(wrong){
+    const w = wrong===' ' ? 'CÁCH' : wrong.toUpperCase();
+    hint.innerHTML = `Nhầm rồi! Bạn gõ <span class="wrongk">${w}</span>. Hãy gõ ${label} bằng ${chip}`;
+  } else hint.innerHTML = `Gõ ${label} bằng ${chip}`;
 }
 function flashKey(c, ok){
   const k = document.querySelector(`.key[data-k="${CSS.escape(c)}"]`); if(!k) return;
   const cls = ok ? 'pressed' : 'wrong';
-  k.classList.add(cls); setTimeout(()=>k.classList.remove(cls), ok?110:260);
+  k.classList.remove(cls); void k.offsetWidth; k.classList.add(cls);
+  clearTimeout(k._t); k._t = setTimeout(()=>k.classList.remove(cls), ok?110:700);
+}
+function oops(el){
+  if(!el) return;
+  el.classList.add('oops'); clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('oops'), 450);
 }
 
 /* ---------- screens ---------- */
@@ -324,6 +340,7 @@ function goHome(){
 function openPlay(title){
   $('#home').hidden = true; $('#play').hidden = false; $('#playTitle').textContent = title;
   $('#stage').innerHTML=''; window.scrollTo(0,0);
+  if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
 }
 function renderHome(){
   const path = $('#path'); path.innerHTML='';
@@ -368,9 +385,11 @@ function startLesson(i){
 }
 function updateLesson(){
   P.spans.forEach((s,i)=>{ s.classList.toggle('cur', i===P.pos); });
-  setTarget(P.text[P.pos] ?? null);
+  setTarget(P.text[P.pos] ?? null, P.lastWrong);
+  $('#stat2').classList.toggle('bad', false);
   const acc = P.ok+P.bad ? Math.round(P.ok/(P.ok+P.bad)*100) : 100;
-  $('#stat1').textContent = `Chính xác ${acc}%`;
+  $('#stat1').textContent = `Chính xác ${acc}% · Sai ${P.bad}`;
+  $('#stat1').classList.toggle('bad', !!P.lastWrong);
   const min = P.t0 ? (performance.now()-P.t0)/60000 : 0;
   $('#stat2').textContent = `${min>0.05?Math.round(P.ok/min):0} phím/phút`;
   $('#pbar').style.width = (P.pos/P.text.length*100)+'%';
@@ -379,11 +398,11 @@ function lessonKey(c){
   if(!P.t0) P.t0 = performance.now();
   const want = P.text[P.pos], span = P.spans[P.pos];
   if(c===want){
-    P.ok++; span.classList.remove('err'); span.classList.add('ok'); P.pos++; flashKey(c,true); sGood();
+    P.ok++; P.lastWrong = null; span.classList.remove('err'); span.classList.add('ok'); P.pos++; flashKey(c,true); sGood();
     if(P.pos>=P.text.length) return finishLesson();
   } else {
-    P.bad++; flashKey(c,false); sBad();
-    span.classList.remove('err'); void span.offsetWidth; span.classList.add('err');
+    P.bad++; P.lastWrong = c; flashKey(c,false); sBad();
+    span.classList.add('err'); oops(span.closest('.textbox'));
   }
   updateLesson();
 }
@@ -441,12 +460,13 @@ function balloonLoop(ts){
   }
   const urgent = B.items.reduce((m,b)=>!m||b.y<m.y?b:m, null);
   B.items.forEach(b=>b.el.classList.toggle('urgent', b===urgent));
-  setTarget(urgent ? urgent.c : null);
+  setTarget(urgent ? urgent.c : null, B.wrongUntil > ts ? B.wrong : null);
   loopId = requestAnimationFrame(balloonLoop);
 }
 function balloonKey(c){
   const hits = B.items.filter(b=>b.c===c);
-  if(!hits.length){ flashKey(c,false); sBad(); return; }
+  if(!hits.length){ flashKey(c,false); sBad(); oops(B.arena); B.wrong = c; B.wrongUntil = performance.now() + 1200; return; }
+  B.wrongUntil = 0;
   const b = hits.reduce((m,x)=>x.y<m.y?x:m);
   flashKey(c,true); sPop();
   const p = document.createElement('div'); p.className='pop'; p.textContent='+1';
@@ -492,7 +512,7 @@ function startRace(){
 function laneX(el, frac){ const lane = el.parentElement; el.style.left = `calc(${Math.min(frac,1)} * (100% - 64px))`; }
 function drawWord(){
   const w = R.list[R.idx]||'';
-  $('#word').innerHTML = [...w].map((c,i)=>`<span class="${i<R.pos?'ok':i===R.pos?'cur':''}">${c}</span>`).join('');
+  $('#word').innerHTML = [...w].map((c,i)=>`<span class="${i<R.pos?'ok':i===R.pos?('cur'+(R.lastWrong?' err':'')):''}">${c}</span>`).join('');
 }
 function raceLoop(ts){
   if(mode!=='race') return;
@@ -505,12 +525,11 @@ function raceLoop(ts){
 function raceKey(c){
   const w = R.list[R.idx];
   if(c===w[R.pos]){
-    R.ok++; R.pos++; flashKey(c,true); sGood();
+    R.ok++; R.pos++; R.lastWrong = null; flashKey(c,true); sGood();
     if(R.pos>=w.length){ R.idx++; R.pos=0; sPop(); laneX($('#me'), R.idx/10); $('#stat1').textContent=`Từ: ${R.idx}/10`;
       if(R.idx>=10) return endRace(true); }
-  } else { R.bad++; flashKey(c,false); sBad();
-    const s = $('#word .cur'); if(s){ s.classList.add('err'); setTimeout(()=>s.classList.remove('err'),250); } }
-  drawWord(); setTarget(R.list[R.idx][R.pos]);
+  } else { R.bad++; R.lastWrong = c; flashKey(c,false); sBad(); oops($('.track')); }
+  drawWord(); setTarget(R.list[R.idx][R.pos], R.lastWrong);
 }
 function endRace(win){
   stopLoop(); setTarget(null); mode='result';
